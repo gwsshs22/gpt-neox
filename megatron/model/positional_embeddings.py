@@ -73,7 +73,8 @@ def rotate_half(x):
     )  # dim=-1 triggers a bug in earlier torch versions
 
 
-@torch.jit.script
+# gwkim
+# @torch.jit.script
 def apply_rotary_pos_emb(q, k, cos, sin, offset: int = 0):
     cos, sin = (
         cos[offset : q.shape[0] + offset, ...],

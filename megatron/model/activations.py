@@ -59,7 +59,8 @@ def get_activation(neox_args):
 # x * 0.5 * (1.0 + torch.erf(x * 0.70710678))
 
 
-@torch.jit.script
+# gwkim
+# @torch.jit.script
 def bias_gelu(bias, y):
     x = bias + y
     return x * 0.5 * (1.0 + torch.tanh(0.79788456 * x * (1 + 0.044715 * x * x)))
@@ -68,7 +69,8 @@ def bias_gelu(bias, y):
 # gradient of tanh approximation of gelu
 # gradient of actual gelu is:
 # 0.5 * (1. + torch.erf(x * 0.70710678)) + 0.3989423 * x * torch.exp(-0.5 * x * x)
-@torch.jit.script
+# gwkim
+# @torch.jit.script
 def bias_gelu_back(g, bias, y):
     x = bias + y
     tanh_out = torch.tanh(0.79788456 * x * (1 + 0.044715 * x * x))
@@ -97,7 +99,8 @@ bias_gelu_impl = GeLUFunction.apply
 
 
 # This is actually Python equivalent of torch.nn.functional.gelu(), also with type hints for ONNX exporter
-@torch.jit.script
+# gwkim
+# @torch.jit.script
 def erf_gelu(x):
     return (
         x
@@ -109,12 +112,14 @@ def erf_gelu(x):
     )
 
 
-@torch.jit.script
+# gwkim
+# @torch.jit.script
 def swish(x, beta: float = 1.0):
     return x * torch.sigmoid(beta * x)
 
 
-@torch.jit.script
+# gwkim
+# @torch.jit.script
 def mish(x):
     return x * torch.tanh(F.softplus(x))
 

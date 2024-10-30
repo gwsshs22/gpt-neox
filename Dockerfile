@@ -90,9 +90,12 @@ RUN pip install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_sta
 COPY requirements/requirements.txt .
 COPY requirements/requirements-onebitadam.txt .
 COPY requirements/requirements-sparseattention.txt .
+COPY requirements/requirements-flashattention.txt .
 RUN pip install -r requirements.txt && pip install -r requirements-onebitadam.txt && \
     pip install -r requirements-sparseattention.txt && \
+    pip install -r requirements-flashattention.txt && \
     pip install protobuf==3.20.* && \
+    pip install best-download && \
     pip cache purge
 
 ## Install APEX

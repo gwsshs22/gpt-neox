@@ -109,6 +109,7 @@ class DistributedBatchSampler(data.sampler.BatchSampler):
         drop_last,
         rank=-1,
         world_size=2,
+        gradient_accumulation_steps=1,
         wrap_last=False,
         interleave=False,
     ):
@@ -118,6 +119,7 @@ class DistributedBatchSampler(data.sampler.BatchSampler):
             rank = torch.distributed.get_rank()
         self.rank = rank
         self.world_size = world_size
+        self.gradient_accumulation_steps = gradient_accumulation_steps
         self.sampler.wrap_around = 0
         self.wrap_around = 0
         self.wrap_last = wrap_last
@@ -132,7 +134,8 @@ class DistributedBatchSampler(data.sampler.BatchSampler):
             if len(batch) == self.batch_size:
                 tbatch = self._batch(batch)
                 if i >= self.start_iter:
-                    yield tbatch
+                    for micro_batch in tbatch:
+                        yield micro_batch
                     self.start_iter = 0
                 i += 1
                 batch = []
@@ -142,7 +145,8 @@ class DistributedBatchSampler(data.sampler.BatchSampler):
                 self.sampler.wrap_around -= self.batch_size
                 self.wrap_around += len(batch)
                 self.wrap_around %= self.batch_size
-            yield self._batch(batch)
+            for micro_batch in self._batch(batch):
+                yield micro_batch
         if self.wrap_last:
             self.sampler.wrap_around += self.batch_size
 
@@ -159,7 +163,18 @@ class DistributedBatchSampler(data.sampler.BatchSampler):
     def _batch(self, batch):
         """extracts samples only pertaining to this worker's batch"""
         if self.interleave:
-            return batch[self.rank : self.batch_size : self.world_size]
+            assert self.gradient_accumulation_steps == 1, "Not implemented yet"
+            return [batch[self.rank : self.batch_size : self.world_size]]
         start = self.rank * self.batch_size // self.world_size
         end = (self.rank + 1) * self.batch_size // self.world_size
-        return batch[start:end]
+        if self.gradient_accumulation_steps == 1:
+            return [batch[start:end]]
+        else:
+            micro_batches = []
+            micro_batch_size = (end - start) // self.gradient_accumulation_steps
+            for gas_idx in range(self.gradient_accumulation_steps):
+                micro_batches.append(batch[start + gas_idx * micro_batch_size:start + (gas_idx + 1) * micro_batch_size])
+            assert start + micro_batch_size * (gas_idx + 1) == end
+            return micro_batches
+
+        

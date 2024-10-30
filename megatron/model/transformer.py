@@ -429,7 +429,7 @@ class ParallelSelfAttention(nn.Module):
         )
 
         # Combined q/k/v into [b * s, 3, np, hn].
-        qkv = torch.concat([query_layer, key_layer, value_layer], dim=1)
+        qkv = torch.cat([query_layer, key_layer, value_layer], dim=1)
 
         batch_size = output_size[0]
         seqlen = output_size[2]

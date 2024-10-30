@@ -33,7 +33,9 @@ def make_data_loader(dataset, neox_args):
     # Data parallel arguments.
     world_size = mpu.get_data_parallel_world_size()
     rank = mpu.get_data_parallel_rank()
-    global_batch_size = neox_args.batch_size * world_size
+    gradient_accumulation_steps = neox_args.gradient_accumulation_steps
+    global_batch_size = neox_args.batch_size * world_size * gradient_accumulation_steps
+    print_rank_0(f" > global_batch_size = {global_batch_size}")
     num_workers = neox_args.num_workers
 
     # Use a simple sampler with distributed batch sampler.
@@ -44,6 +46,7 @@ def make_data_loader(dataset, neox_args):
         drop_last=True,
         rank=rank,
         world_size=world_size,
+        gradient_accumulation_steps=gradient_accumulation_steps
     )
     # Torch dataloader.
     return torch.utils.data.DataLoader(
