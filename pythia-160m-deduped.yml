@@ -45,11 +45,11 @@
     "cpu_offload": false
   },
 
-  # batch size (trained on 2 gpus)
+  # batch size (trained on 4 gpus)
   "train_micro_batch_size_per_gpu": 32,
-  "gradient_accumulation_steps": 16,
+  "gradient_accumulation_steps": 8,
   "data-impl": "mmap",
-  "num_workers": 2,
+  "num_workers": 1,
 
   # activation checkpointing
   "checkpoint-activations": true,
@@ -98,8 +98,8 @@
   "launcher": "pdsh",
   "save": "/datadir/pythia-160M-pretraining/checkpoints",
   # "load": "/datadir/pythia-160M-pretraining/checkpoints",
-  "checkpoint_validation_with_forward_pass": False,
-  "tensorboard_dir": "tensorboard_dir_160M",
+  # "checkpoint_validation_with_forward_pass": False,
+  # "tensorboard_dir": "tensorboard_dir_160M",
   # "deepspeed_slurm": true,
   # "hostfile": "/gpt-neox/hostfile"
   # "launcher": "mpi",
